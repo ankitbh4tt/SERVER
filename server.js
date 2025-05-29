@@ -4,6 +4,7 @@ const cors = require("cors");
 const connectDB = require("./config/db");
 const errorHandler = require("./middleware/errorMiddleware");
 const userRouter = require("./routes/userRoutes");
+const expenseRouter = require("./routes/expenseRouter");
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.get("/", (req, res) => {
 
 // Routes setup yahan add karo (in future)
 app.use("/api/v1/user", userRouter);
+app.use("/api/v1/expenses", expenseRouter);
 
 // Error handler last me
 app.use(errorHandler);
