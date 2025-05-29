@@ -12,12 +12,18 @@ const registerUser = async (req, res, next) => {
   }
   try {
     const validateData = userRegisterSchema.parse(req.body);
-    const { username } = validateData;
-    const isUserAlreadyExists = await User.find({ username });
-    if (isUserAlreadyExists.length) {
+    const { username, email } = validateData;
+    const isUserAlreadyExists = await User.findOne({ username });
+    if (isUserAlreadyExists) {
       return res.status(409).json({
         message:
           "User Already Exists with this username,Please try with different one!",
+      });
+    }
+    const isExistingEmail = await User.findOne({ email: email.toLowerCase() });
+    if (isExistingEmail) {
+      return res.status(409).json({
+        message: "User already exists with this email,Please try another one!",
       });
     }
     const hashedPassword = await hashPassword(validateData.password);
@@ -46,9 +52,8 @@ const loginUser = async (req, res, next) => {
     const user = await User.findOne({
       email: validateData.email.toLowerCase(),
     });
-    console.log(user);
     if (!user) {
-      return res.status(404).json({ error: "User didn't exists!" });
+      return res.status(404).json({ error: "Invalid Credentials!" });
     }
 
     // found user now try to compare password using bcrypt
