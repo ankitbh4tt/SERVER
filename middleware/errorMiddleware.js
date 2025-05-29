@@ -44,9 +44,18 @@ const errorHandler = (err, req, res, next) => {
   // If you have Zod errors (validation library)
   if (err.name === "ZodError") {
     statusCode = 400;
-    message = err.errors
-      .map((e) => `${e.path.join(".")} - ${e.message}`)
-      .join(", ");
+
+    const formattedErrors = err.errors.map((e) => ({
+      path: e.path.join("."),
+      message: e.message,
+    }));
+
+    return res.status(statusCode).json({
+      success: false,
+      message: "Validation failed",
+      errors: formattedErrors,
+      stack: process.env.NODE_ENV === "production" ? undefined : err.stack,
+    });
   }
 
   // Send response
