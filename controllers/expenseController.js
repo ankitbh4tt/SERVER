@@ -4,6 +4,7 @@ const {
   updateExpenseSchema,
 } = require("../validators/expenseValidators");
 const Expense = require("../models/expenseModel");
+const { default: mongoose } = require("mongoose");
 
 // Controller to create new expense
 const createNewExpense = async (req, res, next) => {
@@ -59,17 +60,16 @@ const getAllExpenses = async (req, res, next) => {
   }
 };
 
-// Controller to update a expense
+// Controller to update an expense
 const updateSingleExpenseByID = async (req, res, next) => {
   try {
     const expenseId = req.params.id;
-    if (!req.body) {
+    if (!Object.keys(req.body).length) {
       return res
         .status(400)
         .json({ message: "At least one field must be updated" });
     }
     const updatedExpense = updateExpenseSchema.parse(req.body);
-    console.log(updatedExpense);
     const expense = await Expense.findOneAndUpdate(
       { _id: expenseId, spentBy: req._id },
       updatedExpense,
@@ -84,4 +84,37 @@ const updateSingleExpenseByID = async (req, res, next) => {
   }
 };
 
-module.exports = { createNewExpense, getAllExpenses, updateSingleExpenseByID };
+// Controller to delete an expense
+const deleteSingleExpenseByID = async (req, res, next) => {
+  try {
+    const expenseId = req.params.id;
+    if (!expenseId) {
+      return res.status(404).json({ error: "Expense ID is missing !" });
+    }
+    if (!mongoose.Types.ObjectId.isValid(expenseId)) {
+      return res.status(400).json({ error: "Invalid Expense ID format!" });
+    }
+    const expense = await Expense.findOneAndDelete({
+      _id: expenseId,
+      spentBy: req._id,
+    });
+    if (!expense) {
+      return res
+        .status(400)
+        .json({ message: "Expense not found or user is unauthorized!" });
+    }
+    return res.status(200).json({
+      message: `${expense.title} removed successfully!`,
+      expenseId: expense?._id,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  createNewExpense,
+  getAllExpenses,
+  updateSingleExpenseByID,
+  deleteSingleExpenseByID,
+};
