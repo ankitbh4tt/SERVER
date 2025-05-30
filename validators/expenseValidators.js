@@ -16,4 +16,19 @@ const newExpenseSchema = z.object({
     .nonnegative("Amount must be in positive digits!"),
 });
 
-module.exports = { newExpenseSchema };
+const expenseDateRangeFilterationSchema = z.object({
+  startDate: z
+    .string({
+      required_error: "Start date is required!",
+      invalid_type_error: "Start date must be a date type!",
+    })
+    .transform((val) => new Date(val)),
+  endDate: z
+    .string({
+      required_error: "End date is required!",
+      invalid_type_error: "End date must be a date type!",
+    })
+    .transform((val) => new Date(val)),
+});
+
+module.exports = { newExpenseSchema, expenseDateRangeFilterationSchema };
