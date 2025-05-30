@@ -3,6 +3,7 @@ const {
   createNewExpense,
   getAllExpenses,
   updateSingleExpenseByID,
+  deleteSingleExpenseByID,
 } = require("../controllers/expenseController");
 const checkUserAuthentication = require("../middleware/authMiddleware");
 
@@ -14,5 +15,6 @@ router.use(checkUserAuthentication);
 router.post("/new", createNewExpense);
 router.get("/bulk", getAllExpenses);
 router.put("/update/:id", updateSingleExpenseByID);
+router.delete("/delete/:id", deleteSingleExpenseByID);
 
 module.exports = router;
