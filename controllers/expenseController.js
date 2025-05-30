@@ -1,6 +1,7 @@
 const {
   newExpenseSchema,
   expenseDateRangeFilterationSchema,
+  updateExpenseSchema,
 } = require("../validators/expenseValidators");
 const Expense = require("../models/expenseModel");
 
@@ -62,7 +63,22 @@ const getAllExpenses = async (req, res, next) => {
 const updateSingleExpenseByID = async (req, res, next) => {
   try {
     const expenseId = req.params.id;
-    console.log(expenseId);
+    if (!req.body) {
+      return res
+        .status(400)
+        .json({ message: "At least one field must be updated" });
+    }
+    const updatedExpense = updateExpenseSchema.parse(req.body);
+    console.log(updatedExpense);
+    const expense = await Expense.findOneAndUpdate(
+      { _id: expenseId, spentBy: req._id },
+      updatedExpense,
+      { new: true }
+    );
+    if (!expense) {
+      return res.status(404).json({ message: "No expense found!" });
+    }
+    return res.status(200).json(expense);
   } catch (error) {
     next(error);
   }
