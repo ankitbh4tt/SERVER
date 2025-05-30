@@ -31,4 +31,18 @@ const expenseDateRangeFilterationSchema = z.object({
     .transform((val) => new Date(val)),
 });
 
-module.exports = { newExpenseSchema, expenseDateRangeFilterationSchema };
+const updateExpenseSchema = z.object({
+  title: z.string().optional(),
+  description: z.string().optional(),
+  amount: z
+    .number({
+      invalid_type_error: "Amount must be a number!",
+    })
+    .optional(),
+});
+
+module.exports = {
+  newExpenseSchema,
+  expenseDateRangeFilterationSchema,
+  updateExpenseSchema,
+};
