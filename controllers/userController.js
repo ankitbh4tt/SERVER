@@ -76,4 +76,31 @@ const loginUser = async (req, res, next) => {
   }
 };
 
-module.exports = { registerUser, loginUser };
+const checkUserSession = async (req, res, next) => {
+  try {
+    const token = req.headers?.authorization?.split(" ")?.[1];
+    if (!token) {
+      return res.status(400).json({ error: "Missing token!" });
+    }
+    const userId = await jwt.verify(token, process.env.JWT_SECRET);
+    if (!userId) {
+      return res.status(401).json({ error: "Invalid token!!" });
+    }
+    if (userId) {
+      const user = await User.findById(userId.id, { _id: 0, __v: 0 });
+
+      console.log(user);
+      if (!user) {
+        return res
+          .status(401)
+          .json({ error: "Session Expired!Please login again." });
+      }
+      return res.status(200).json({ user, success: true });
+    }
+    console.log(userId);
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { registerUser, loginUser, checkUserSession };
