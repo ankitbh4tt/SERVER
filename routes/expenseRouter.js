@@ -6,6 +6,7 @@ const {
   deleteSingleExpenseByID,
 } = require("../controllers/expenseController");
 const checkUserAuthentication = require("../middleware/authMiddleware");
+const tempRateLimiter = require("../middleware/tempRateLimmiter");
 
 const router = express.Router();
 

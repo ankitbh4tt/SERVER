@@ -10,16 +10,30 @@ const { default: mongoose } = require("mongoose");
 const createNewExpense = async (req, res, next) => {
   try {
     const validatedData = newExpenseSchema.parse(req.body);
-    const { title, description, amount } = validatedData;
-    let expense = await Expense.create({
+    const { title, description, amount, type, category, source } =
+      validatedData;
+
+    // Build the object to save
+    const expenseData = {
       title,
       description,
       amount,
+      type,
       spentBy: req._id,
-    });
-    // Fetching User's detail who created this expense
+    };
+
+    // Add category or source based on type
+    if (type === "EXPENSE") {
+      expenseData.category = category.toUpperCase();
+    } else if (type === "INCOME") {
+      expenseData.source = source.toUpperCase();
+    }
+
+    // Create and populate expense
+    let expense = await Expense.create(expenseData);
     expense = await expense.populate("spentBy");
-    return res.json({ expense });
+
+    return res.status(201).json({ expense });
   } catch (error) {
     next(error);
   }
@@ -39,21 +53,24 @@ const getAllExpenses = async (req, res, next) => {
 
     // set endDate to full day by setting hours
     endDate.setHours(23, 59, 59, 999);
+    console.log(req._id);
     //fetch expenses on descending order
     const expenses = await Expense.find({
-      spentBy: req._id,
       createdAt: {
         $gte: startDate,
         $lte: endDate,
       },
-    }).sort({
-      createdAt: -1,
-    });
+    })
+      .populate("spentBy", { _id: 0, email: 0 })
+      .sort({
+        createdAt: -1,
+      });
     if (!expenses.length) {
       return res
         .status(200)
         .json({ message: "No expenses found. Please create one" });
     }
+    // const
     return res.status(200).json(expenses);
   } catch (error) {
     next(error);
