@@ -97,7 +97,6 @@ const checkUserSession = async (req, res, next) => {
       }
       return res.status(200).json({ user, success: true });
     }
-    console.log(userId);
   } catch (error) {
     next(error);
   }
