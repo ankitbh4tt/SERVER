@@ -5,6 +5,7 @@ const {
 } = require("../validators/expenseValidators");
 const Expense = require("../models/expenseModel");
 const { default: mongoose } = require("mongoose");
+const { calculateExpenseSummary } = require("../utils/calculateExpenseSummary");
 
 // Controller to create new expense
 const createNewExpense = async (req, res, next) => {
@@ -45,6 +46,7 @@ const getAllExpenses = async (req, res, next) => {
     if (!req.query?.startDate || !req.query?.endDate) {
       return res.status(400).json({ error: "Please select date range!" });
     }
+
     const validatedData = expenseDateRangeFilterationSchema.parse(req.query);
 
     // set and format dates
@@ -53,25 +55,25 @@ const getAllExpenses = async (req, res, next) => {
 
     // set endDate to full day by setting hours
     endDate.setHours(23, 59, 59, 999);
-    console.log(req._id);
     //fetch expenses on descending order
-    const expenses = await Expense.find({
-      createdAt: {
-        $gte: startDate,
-        $lte: endDate,
+    const expenses = await Expense.find(
+      {
+        createdAt: {
+          $gte: startDate,
+          $lte: endDate,
+        },
       },
-    })
-      .populate("spentBy", { _id: 0, email: 0 })
-      .sort({
-        createdAt: -1,
-      });
+      { spentBy: 0, __v: 0 }
+    ).sort({ createdAt: -1 });
+
     if (!expenses.length) {
       return res
         .status(200)
         .json({ message: "No expenses found. Please create one" });
     }
-    // const
-    return res.status(200).json(expenses);
+    const expenseSummary = calculateExpenseSummary(expenses);
+    const filteredExpenses = expenses.slice(0, 5);
+    return res.status(200).json({ expenses: filteredExpenses, expenseSummary });
   } catch (error) {
     next(error);
   }
