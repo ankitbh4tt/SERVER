@@ -52,7 +52,7 @@ const getAllExpenses = async (req, res, next) => {
     // set and format dates
     const startDate = new Date(validatedData.startDate);
     const endDate = new Date(validatedData.endDate);
-
+    const allTnx = req.query?.allTnx || false;
     // set endDate to full day by setting hours
     endDate.setHours(23, 59, 59, 999);
     //fetch expenses on descending order
@@ -72,7 +72,7 @@ const getAllExpenses = async (req, res, next) => {
         .json({ message: "No expenses found. Please create one" });
     }
     const expenseSummary = calculateExpenseSummary(expenses);
-    const filteredExpenses = expenses.slice(0, 5);
+    const filteredExpenses = allTnx ? expenses : expenses.slice(0, 5);
     return res.status(200).json({ expenses: filteredExpenses, expenseSummary });
   } catch (error) {
     next(error);
