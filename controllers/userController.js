@@ -89,7 +89,6 @@ const checkUserSession = async (req, res, next) => {
     if (userId) {
       const user = await User.findById(userId.id, { _id: 0, __v: 0 });
 
-      console.log(user);
       if (!user) {
         return res
           .status(401)

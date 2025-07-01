@@ -58,6 +58,7 @@ const getAllExpenses = async (req, res, next) => {
     //fetch expenses on descending order
     const expenses = await Expense.find(
       {
+        spentBy: req._id,
         createdAt: {
           $gte: startDate,
           $lte: endDate,
@@ -69,7 +70,7 @@ const getAllExpenses = async (req, res, next) => {
     if (!expenses.length) {
       return res
         .status(200)
-        .json({ message: "No expenses found. Please create one" });
+        .json({ message: "No Transaction found. Please create one" });
     }
     const expenseSummary = calculateExpenseSummary(expenses);
     const filteredExpenses = allTnx ? expenses : expenses.slice(0, 5);
